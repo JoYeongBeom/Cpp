@@ -1,1 +1,53 @@
+#include <iostream>
+#include <sqlite3.h>
+
+using namespace std;
+
+int main() {
+    // SQLite3 데이터베이스 연결
+    sqlite3 *db;
+    int rc;
+
+    rc = sqlite3_open("sj.db", &db);
+    if (rc != SQLITE_OK) {
+        cerr << "데이터베이스 열기 실패: " << sqlite3_errmsg(db) << endl;
+        return 1;
+    }
+
+    // 쿼리 준비
+    const char *sql = "SELECT * FROM scores;";
+    sqlite3_stmt *stmt;
+
+    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        cerr << "쿼리 준비 실패: " << sqlite3_errmsg(db) << endl;
+        sqlite3_close(db);
+        return 1;
+    }
+
+    int total_subject1 = 0, total_subject2 = 0, total_students = 0;
+
+    // 결과 처리
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        int subject1 = sqlite3_column_int(stmt, 1);
+        int subject2 = sqlite3_column_int(stmt, 2);
+
+        int total_score = subject1 + subject2;
+        float average_score = total_score / 2.0;
+
+        total_subject1 += subject1;
+        total_subject2 += subject2;
+        total_students++;
+
+        cout << "학생 ID: " << id << ", 과목1 성적: " << subject1 << ", 과목2 성적: " << subject2 << ", 총점: " << total_score << ", 평균: " << average_score << endl;
+    }
+
+    if (rc != SQLITE_DONE) {
+        cerr << "쿼리 실행 실패: " << sqlite3_errmsg(db) << endl;
+    }
+
+    // 과목별 평균 계산
+    float average_subject1 = total_subject1 / static_cast<float>(total_students);
+    float average_subject2 = total
 

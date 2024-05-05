@@ -4,18 +4,18 @@
 using namespace std;
 
 int main() {
-    // SQLite3 데이터베이스 연결
     sqlite3 *db;
     int rc;
 
+    // SQLite3 데이터베이스 연결
     rc = sqlite3_open("sj.db", &db);
     if (rc != SQLITE_OK) {
         cerr << "데이터베이스 열기 실패: " << sqlite3_errmsg(db) << endl;
         return 1;
     }
 
-    // 쿼리 준비
-    const char *sql = "SELECT * FROM scores;";
+    // 학생별 총점, 평균, 과목별 총점 평균을 계산하는 쿼리
+    const char *sql = "SELECT student_id, subject1, subject2 FROM scores;";
     sqlite3_stmt *stmt;
 
     rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
@@ -26,10 +26,11 @@ int main() {
     }
 
     int total_subject1 = 0, total_subject2 = 0, total_students = 0;
+    int total_score_subject1 = 0, total_score_subject2 = 0;
 
     // 결과 처리
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-        int id = sqlite3_column_int(stmt, 0);
+        int student_id = sqlite3_column_int(stmt, 0);
         int subject1 = sqlite3_column_int(stmt, 1);
         int subject2 = sqlite3_column_int(stmt, 2);
 
@@ -39,15 +40,28 @@ int main() {
         total_subject1 += subject1;
         total_subject2 += subject2;
         total_students++;
+        total_score_subject1 += subject1;
+        total_score_subject2 += subject2;
 
-        cout << "학생 ID: " << id << ", 과목1 성적: " << subject1 << ", 과목2 성적: " << subject2 << ", 총점: " << total_score << ", 평균: " << average_score << endl;
+        cout << "학생 ID: " << student_id << ", 과목1 성적: " << subject1 << ", 과목2 성적: " << subject2 << ", 총점: " << total_score << ", 평균: " << average_score << endl;
     }
 
     if (rc != SQLITE_DONE) {
         cerr << "쿼리 실행 실패: " << sqlite3_errmsg(db) << endl;
     }
 
-    // 과목별 평균 계산
-    float average_subject1 = total_subject1 / static_cast<float>(total_students);
-    float average_subject2 = total
+    // 학생별 총점 평균 출력
+    float total_average_score = (total_score_subject1 + total_score_subject2) / (2.0 * total_students);
+    cout << "학생별 총점 평균: " << total_average_score << endl;
 
+    // 과목별 총점 평균 출력
+    float average_subject1 = total_subject1 / static_cast<float>(total_students);
+    float average_subject2 = total_subject2 / static_cast<float>(total_students);
+    cout << "과목별 총점 평균 - 과목1: " << average_subject1 << ", 과목2: " << average_subject2 << endl;
+
+    // SQLite3 데이터베이스 및 문장 닫기
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+
+    return 0;
+}

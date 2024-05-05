@@ -1,60 +1,14 @@
-#include <iostream>
-#include <sqlite3.h>
+sqlite3 sj.db
 
-using namespace std;
+학생 성적 테이블 생성
+CREATE TABLE IF NOT EXISTS scores (
+    student_id INTEGER PRIMARY KEY,
+    subject1 INTEGER,
+    subject2 INTEGER
+);
 
-int main() {
-    // SQLite3 데이터베이스 연결
-    sqlite3 *db;
-    int rc;
-
-    rc = sqlite3_open("sj.db", &db);
-    if (rc != SQLITE_OK) {
-        cerr << "데이터베이스 열기 실패: " << sqlite3_errmsg(db) << endl;
-        return 1;
-    }
-
-    // 학생 성적 테이블 생성
-    const char *create_table_sql = "CREATE TABLE IF NOT EXISTS scores (student_id INTEGER, subject1 INTEGER, subject2 INTEGER);";
-    rc = sqlite3_exec(db, create_table_sql, NULL, NULL, NULL);
-    if (rc != SQLITE_OK) {
-        cerr << "테이블 생성 실패: " << sqlite3_errmsg(db) << endl;
-        sqlite3_close(db);
-        return 1;
-    }
-
-    // 학생 성적 삽입
-    const char *insert_sql = "INSERT INTO scores (student_id, subject1, subject2) VALUES (?, ?, ?);";
-    sqlite3_stmt *stmt;
-
-    rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        cerr << "쿼리 준비 실패: " << sqlite3_errmsg(db) << endl;
-        sqlite3_close(db);
-        return 1;
-    }
-
-    // 3명의 성적 삽입
-    for (int i = 1; i <= 3; ++i) {
-        sqlite3_bind_int(stmt, 1, i); // 학생 ID
-        sqlite3_bind_int(stmt, 2, rand() % 101); // 과목1 성적 (0부터 100까지의 임의의 값)
-        sqlite3_bind_int(stmt, 3, rand() % 101); // 과목2 성적 (0부터 100까지의 임의의 값)
-
-        rc = sqlite3_step(stmt);
-        if (rc != SQLITE_DONE) {
-            cerr << "쿼리 실행 실패: " << sqlite3_errmsg(db) << endl;
-            sqlite3_finalize(stmt);
-            sqlite3_close(db);
-            return 1;
-        }
-        sqlite3_reset(stmt);
-    }
-
-    // SQLite3 데이터베이스 및 문장 닫기
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
-
-    cout << "데이터베이스에 성적이 성공적으로 저장되었습니다." << endl;
-
-    return 0;
-}
+학생 성적 삽입
+INSERT INTO scores (student_id, subject1, subject2) VALUES
+    (1, 80, 75),
+    (2, 65, 70),
+    (3, 90, 85);

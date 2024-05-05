@@ -5,7 +5,7 @@ sqlite-amalgamation-XXX.zip과 sqlite-dll-win-64-x86-XXX.zip을 다운로드하�
 
 단계 2: SQLite3 라이브러리 추가
 Visual Studio - Tools - Command Line - Developer Command Prompt 실행
-sqlite3.def, sqlite3.dll 파일이 있는 sqlite-dll-win64-x86-XXX 폴더에서 아래 명령어를 실해앟면 sqlite3.lib 파일이 생성된다.
+sqlite3.def, sqlite3.dll 파일이 있는 sqlite-dll-win64-x86-XXX 폴더에서 아래 명령어를 실행하면 sqlite3.lib 파일이 생성된다.
 lib /def:sqlite3.def /machine:x86
 
 단계 3: C++ 프로젝트 설정
